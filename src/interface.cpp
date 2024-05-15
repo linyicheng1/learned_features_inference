@@ -165,9 +165,7 @@ void Interface::preprocessing(cv::Mat &image, float *&blob, std::vector<int64_t>
 void Interface::postprocessing(ov::InferRequest &request,
                                cv::Mat& score_map_mat,
                                cv::Mat& descriptor_map_mat) {
-    if (model_type == "d2net") {
-        d2net_postprocessing(request, score_map_mat, descriptor_map_mat);
-    } else if (model_type == "alike" || model_type == "SuperPoint" || model_type == "disk" || model_type == "xfeat") {
+    if (model_type == "d2net" || model_type == "alike" || model_type == "SuperPoint" || model_type == "disk" || model_type == "xfeat") {
         alike_postprocessing(request, score_map_mat, descriptor_map_mat);
     } else {
         std::cout<<" can not find the model type "<<model_type<<std::endl;

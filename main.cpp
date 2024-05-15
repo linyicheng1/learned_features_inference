@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 {
     if (argc < 5)
     {
-        std::cout<<"Usage: ./main <model_type> <model_path> <image_0_path> <image_0_path>"<<std::endl;
+        std::cout<<"Usage: ./openvino_demo <model_type> <model_path> <image_0_path> <image_0_path>"<<std::endl;
         return -1;
     }
     // 1. load the model
@@ -29,6 +29,8 @@ int main(int argc, char const *argv[])
     {
         net_ptr = std::make_shared<Interface>("d2net", argv[2], true, cv::Size(512,512));
         descriptor_dim = 512;
+        descriptor_width = IMAGE_WIDTH / 8;
+        descriptor_height = IMAGE_HEIGHT / 8;
     }
     else if (model_type == "SuperPoint")
     {

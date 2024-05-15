@@ -13,3 +13,9 @@ Implementing c++ inference for various learning point features
 - [OpenVINO](https://docs.openvino.ai/2022.3/home.html)
 - [NCNN](https://github.com/Tencent/ncnn) (TODO)
 - [TensorRT](https://developer.nvidia.com/tensorrt) (TODO)
+
+## Usage:
+```bash
+./openvino_demo <model_type> <model_path> <image_0_path> <image_0_path>
+./openvino_demo alike ../weight/Alike.xml ../images/1.jpg ../images/2.jpg
+```

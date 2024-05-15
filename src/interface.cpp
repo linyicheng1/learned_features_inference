@@ -134,7 +134,11 @@ void Interface::preprocessing(cv::Mat &image, float *&blob, std::vector<int64_t>
     inputTensorShape[3] = resizedImage.cols;
 
     // convert to float
-    resizedImage.convertTo(floatImage, CV_32FC3, 1 / 255.0);
+    if (grayscale) {
+        resizedImage.convertTo(floatImage, CV_32FC1, 1 / 255.0);
+    } else {
+        resizedImage.convertTo(floatImage, CV_32FC3, 1 / 255.0);
+    }
     // allocate memory for the blob
     blob = new float[floatImage.cols * floatImage.rows * floatImage.channels()];
 
@@ -162,14 +166,16 @@ void Interface::postprocessing(ov::InferRequest &request,
                                cv::Mat& score_map_mat,
                                cv::Mat& descriptor_map_mat) {
     if (model_type == "d2net") {
-        std::cout<<" postprocessing for d2net "<<std::endl;
         d2net_postprocessing(request, score_map_mat, descriptor_map_mat);
-    } else if (model_type == "alike") {
-        std::cout<<" postprocessing for alike "<<std::endl;
+    } else if (model_type == "alike" || model_type == "SuperPoint" || model_type == "disk" || model_type == "xfeat") {
         alike_postprocessing(request, score_map_mat, descriptor_map_mat);
     } else {
         std::cout<<" can not find the model type "<<model_type<<std::endl;
     }
+    // grayscale
+//    if (model_type == "SuperPoint") {
+//        grayscale = true;
+//    }
 }
 
 void Interface::d2net_postprocessing(ov::InferRequest &infer_request, cv::Mat &score_map_mat,

@@ -2,39 +2,97 @@
 #include <chrono>
 #include "extractor.h"
 
+#define IMAGE_WIDTH 512
+#define IMAGE_HEIGHT 512
+int descriptor_dim = 64;
+int descriptor_width = IMAGE_WIDTH;
+int descriptor_height = IMAGE_HEIGHT;
 
 int main(int argc, char const *argv[])
 {
-    Interface net{"alike", "/home/vio/Code/NN/openvino_d2net/Alike.xml", true, cv::Size(400,400)};
-    cv::Mat image = cv::imread("../1.jpg");
-    cv::Mat image2 = cv::imread("../2.jpg");
-    cv::resize(image, image, cv::Size(512, 512));
-    cv::resize(image2, image2, cv::Size(512, 512));
-    
+    if (argc < 5)
+    {
+        std::cout<<"Usage: ./main <model_type> <model_path> <image_0_path> <image_0_path>"<<std::endl;
+        return -1;
+    }
+    // 1. load the model
+    std::shared_ptr<Interface> net_ptr;
+    std::string model_type = argv[1];
+    if (model_type == "alike")
+    {
+        net_ptr = std::make_shared<Interface>("alike", argv[2], true, cv::Size(512,512));
+        descriptor_dim = 64;
+        descriptor_width = IMAGE_WIDTH;
+        descriptor_height = IMAGE_HEIGHT;
+    }
+    else if (model_type == "d2net")
+    {
+        net_ptr = std::make_shared<Interface>("d2net", argv[2], true, cv::Size(512,512));
+        descriptor_dim = 512;
+    }
+    else if (model_type == "SuperPoint")
+    {
+        net_ptr = std::make_shared<Interface>("SuperPoint", argv[2], true, cv::Size(512,512));
+        descriptor_dim = 256;
+        descriptor_width = IMAGE_WIDTH / 8;
+        descriptor_height = IMAGE_HEIGHT / 8;
+    }
+    else if (model_type == "disk")
+    {
+        net_ptr = std::make_shared<Interface>("disk", argv[2], true, cv::Size(512,512));
+        descriptor_dim = 128;
+        descriptor_width = IMAGE_WIDTH;
+        descriptor_height = IMAGE_HEIGHT;
+    }
+    else if (model_type == "xfeat")
+    {
+        net_ptr = std::make_shared<Interface>("xfeat", argv[2], true, cv::Size(512,512));
+        descriptor_dim = 64;
+        descriptor_width = IMAGE_WIDTH / 8;
+        descriptor_height = IMAGE_HEIGHT / 8;
+    }
+    else
+    {
+        std::cout<<"model type not supported"<<std::endl;
+        return -1;
+    }
+
+    // 2. load the images
+    std::string img_0_path = argv[3];
+    std::string img_1_path = argv[4];
+    cv::Mat image = cv::imread(img_0_path);
+    cv::Mat image2 = cv::imread(img_1_path);
+    cv::resize(image, image, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+    cv::resize(image2, image2, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+
+    // 3. run the model && extract the key points
     std::vector<cv::KeyPoint> key_points;
-    cv::Mat score_map = cv::Mat(512, 512, CV_32FC1), desc_map = cv::Mat(512, 512, CV_32FC(64));
+    cv::Mat score_map = cv::Mat(IMAGE_WIDTH, IMAGE_HEIGHT, CV_32FC1), \
+            desc_map = cv::Mat(descriptor_width, descriptor_height, CV_32FC(descriptor_dim));
     cv::Mat desc;
 
     std::vector<cv::KeyPoint> key_points2;
-    cv::Mat score_map2 = cv::Mat(512, 512, CV_32FC1), desc_map2 = cv::Mat(512, 512, CV_32FC(64));
+    cv::Mat score_map2 = cv::Mat(512, 512, CV_32FC1), \
+            desc_map2 = cv::Mat(descriptor_width, descriptor_height, CV_32FC(descriptor_dim));
     cv::Mat desc2;
 
     auto start = std::chrono::system_clock::now();
-    net.run(image, score_map, desc_map);
+    net_ptr->run(image, score_map, desc_map);
     key_points = nms(score_map, 500, 0.01, 16, cv::Mat());
     desc = bilinear_interpolation(image.cols, image.rows, desc_map, key_points);
 
-    net.run(image2, score_map2, desc_map2);
+    net_ptr->run(image2, score_map2, desc_map2);
     key_points2 = nms(score_map2, 500, 0.01, 16,cv::Mat());
     desc2 = bilinear_interpolation(image2.cols, image2.rows, desc_map2, key_points2);
 
     auto end = std::chrono::system_clock::now();
 
-    // match the key points
+    // 4. match the key points
     std::vector<cv::DMatch> matches;
     cv::BFMatcher matcher(cv::NORM_L2, true);
     matcher.match(desc, desc2, matches);
 
+    // 5. show the matches
     cv::Mat img_matches;
     cv::drawMatches(image, key_points, image2, key_points2, matches, img_matches);
     cv::imshow("matches", img_matches);

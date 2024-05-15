@@ -46,7 +46,7 @@ Interp           /upsample32/Resize       1 1 /gate_3/Relu_output_0 /upsample32/
 Concat           /Concat                  4 1 /gate/Relu_output_0 /upsample2/Resize_output_0 /upsample8/Resize_output_0 /upsample32/Resize_output_0 /Concat_output_0 0=0
 Convolution      /convhead2/Conv          1 1 /Concat_output_0 /convhead2/Conv_output_0 0=65 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=0 6=4160
 Split            splitncnn_6              1 2 /convhead2/Conv_output_0 /convhead2/Conv_output_0_splitncnn_0 /convhead2/Conv_output_0_splitncnn_1
-Crop             /Slice                   1 1 /convhead2/Conv_output_0_splitncnn_1 125 -23309=1,0 -23310=1,-1 -23311=1,0
+Crop             /Slice                   1 1 /convhead2/Conv_output_0_splitncnn_1 descriptor -23309=1,0 -23310=1,-1 -23311=1,0
 Crop             /Gather                  1 1 /convhead2/Conv_output_0_splitncnn_0 /Gather_output_0 -23309=1,-1 -23310=1,0 -23311=1,0
 Sigmoid          /Sigmoid                 1 1 /Gather_output_0 /Sigmoid_output_0
-ExpandDims       /Unsqueeze               1 1 /Sigmoid_output_0 output -23303=1,0
+ExpandDims       /Unsqueeze               1 1 /Sigmoid_output_0 score -23303=1,0

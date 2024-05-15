@@ -23,9 +23,6 @@ void Interface::run(cv::Mat &image, cv::Mat& score_map_mat, cv::Mat& descriptor_
     ex.extract("score", out1);
     ex.extract("descriptor", out2);
     // ncnn to opencv
-    out1.substract_mean_normalize(mean_vals_inv, norm_vals_inv);
-    out2.substract_mean_normalize(mean_vals_inv, norm_vals_inv);
-
     int score_height = score_map_mat.rows;
     int score_width = score_map_mat.cols;
     memcpy((uchar*)score_map_mat.data, out1.data, score_height*score_width*sizeof(float));
@@ -33,7 +30,12 @@ void Interface::run(cv::Mat &image, cv::Mat& score_map_mat, cv::Mat& descriptor_
     int desc_height = descriptor_map_mat.rows;
     int desc_width = descriptor_map_mat.cols;
     int desc_channels = descriptor_map_mat.channels();
-    cv::Mat desc_tmp(desc_height, desc_width, CV_32FC(desc_channels));
-    memcpy((uchar*)desc_tmp.data, out2.data, desc_height*desc_width*desc_channels*sizeof(float));
+    // chw -> hwc
+    std::vector<cv::Mat> chw(desc_channels);
+    for (int i = 0; i < desc_channels; i++) {
+        chw[i] = cv::Mat(desc_height, desc_width, CV_32FC1);
+        memcpy((uchar*)chw[i].data, out2.channel(i).data, desc_height*desc_width*sizeof(float));
+    }
+    cv::merge(chw, descriptor_map_mat);
 }
 

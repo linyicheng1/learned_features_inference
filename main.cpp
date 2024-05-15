@@ -109,16 +109,16 @@ int main(int argc, char const *argv[])
 
     for (auto& kp : key_points)
     {
-        cv::circle(image, kp.pt, 1, cv::Scalar(0, 0, 255), -1);
+        cv::circle(score_map_show, kp.pt, 1, cv::Scalar(0, 0, 255), -1);
     }
 
     for (auto& kp : key_points2)
     {
-        cv::circle(image2, kp.pt, 1, cv::Scalar(0, 0, 255), -1);
+        cv::circle(score_map_show2, kp.pt, 1, cv::Scalar(0, 0, 255), -1);
     }
 
-    cv::imwrite("kps0.jpg", image);
-    cv::imwrite("kps1.jpg", image2);
+    cv::imwrite("kps0.jpg", score_map_show);
+    cv::imwrite("kps1.jpg", score_map_show2);
     cv::waitKey(0);
 
     std::cout<<"mean cost: "<<std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.f <<" s"<<std::endl;

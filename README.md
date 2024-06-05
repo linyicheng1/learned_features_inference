@@ -1,6 +1,24 @@
 # learned_features_inference
 Implementing c++ inference for various learning point features
 
+## OpenVINO inference time
+| SuperPoint | ALIKE-T   | D2Net      | DISK         | XFeat        |
+|------------|-----------|------------|--------------|--------------|
+| 28.166 ms  | 70.038 ms | 109.992 ms | 408.688 ms | 73.582 ms |
+
+## Examples 
+
+- SuperPoint
+![SuperPoint](images/sp.jpg "SuperPoint")
+- ALIKE-T
+![ALIKE-T](images/alike.jpg "ALIKE-T")
+- DISK
+![DISK](images/disk.jpg "DISK")
+- D2Net
+![D2Net](images/d2net.jpg "D2Net")
+- XFeat
+![XFeat](images/xfeat.jpg "XFeat")
+
 ## Supported Features:
 - [SuperPoint](https://github.com/magicleap/SuperPointPretrainedNetwork)
 - [ALIKE-T](https://github.com/Shiaoming/ALIKE)

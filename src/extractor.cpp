@@ -176,11 +176,5 @@ cv::Mat bilinear_interpolation(int image_w, int image_h, const cv::Mat& desc_map
         }
     }
 
-    std::cout<<" [0, 0] ";
-    for (int i = 0;i < c; i ++) {
-        std::cout<<desc.at<float>(0, i)<<" ";
-    }
-    std::cout<<std::endl;
-
     return desc;
 }

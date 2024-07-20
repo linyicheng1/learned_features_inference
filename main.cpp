@@ -157,7 +157,7 @@ int main(int argc, char const *argv[])
         cv::line(img_matches, pt1, cv::Point2f(pt2.x + IMAGE_WIDTH, pt2.y), cv::Scalar(0, 255, 0), 2);
     }
 
-    cv::imshow("matches", img_matches);
+//    cv::imshow("matches", img_matches);
     cv::imwrite("matches.jpg", img_matches);
 
     cv::Mat score_map_show = score_map * 255.;
@@ -180,7 +180,7 @@ int main(int argc, char const *argv[])
 
     cv::imwrite("kps0.jpg", score_map_show);
     cv::imwrite("kps1.jpg", score_map_show2);
-    cv::waitKey(0);
+//    cv::waitKey(0);
 
     std::cout<<"mean cost: "<<std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.f / 500.f <<" s"<<std::endl;
 }

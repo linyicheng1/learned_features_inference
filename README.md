@@ -6,6 +6,11 @@ Implementing c++ inference for various learning point features
 |------------|-----------|------------|--------------|--------------|
 | 28.166 ms  | 70.038 ms | 109.992 ms | 408.688 ms | 73.582 ms |
 
+## TensorRT inference time
+| SuperPoint | ALIKE-T   | D2Net      | DISK         | XFeat        |
+|------------|-----------|------------|--------------|--------------|
+| 8.217 ms  | 49.953 ms | 18.772 ms | 116.363 ms | 4.255 ms |
+
 ## Examples 
 
 - SuperPoint

@@ -8,11 +8,17 @@ int descriptor_dim = 64;
 int descriptor_width = IMAGE_WIDTH;
 int descriptor_height = IMAGE_HEIGHT;
 
+// ./tensorrt_demo SuperPoint /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/weight/sp.trt /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/1.jpg /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/2.jpg
+// ./tensorrt_demo alike /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/weight/Alike.trt /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/1.jpg /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/2.jpg
+// ./tensorrt_demo d2net /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/weight/D2Net.trt /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/1.jpg /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/2.jpg
+// ./tensorrt_demo disk /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/weight/disk.trt /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/1.jpg /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/2.jpg
+// ./tensorrt_demo xfeat /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/weight/xfeat.trt /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/1.jpg /home/server/linyicheng/cpp_proj/learn_features/learned_features_inference/images/2.jpg
+
 int main(int argc, char const *argv[])
 {
     if (argc < 5)
     {
-        std::cout<<"Usage: ./openvino_demo <model_type> <model_path> <image_0_path> <image_0_path>"<<std::endl;
+        std::cout<<"Usage: ./tensorrt_demo <model_type> <model_path> <image_0_path> <image_0_path>"<<std::endl;
         return -1;
     }
     // 1. load the model
@@ -20,38 +26,48 @@ int main(int argc, char const *argv[])
     std::string model_type = argv[1];
     if (model_type == "alike")
     {
-        net_ptr = std::make_shared<Interface>("alike", argv[2], true, cv::Size(512,512));
         descriptor_dim = 64;
         descriptor_width = IMAGE_WIDTH;
         descriptor_height = IMAGE_HEIGHT;
+        net_ptr = std::make_shared<Interface>("alike", argv[2], true,
+                                              cv::Size(IMAGE_WIDTH,IMAGE_HEIGHT),
+                                              descriptor_width, descriptor_height, descriptor_dim);
     }
     else if (model_type == "d2net")
     {
-        net_ptr = std::make_shared<Interface>("d2net", argv[2], true, cv::Size(512,512));
         descriptor_dim = 512;
         descriptor_width = IMAGE_WIDTH / 8;
         descriptor_height = IMAGE_HEIGHT / 8;
+        net_ptr = std::make_shared<Interface>("d2net", argv[2], true,
+                                              cv::Size(IMAGE_WIDTH,IMAGE_HEIGHT),
+                                              descriptor_width, descriptor_height, descriptor_dim);
     }
     else if (model_type == "SuperPoint")
     {
-        net_ptr = std::make_shared<Interface>("SuperPoint", argv[2], true, cv::Size(512,512));
         descriptor_dim = 256;
         descriptor_width = IMAGE_WIDTH / 8;
         descriptor_height = IMAGE_HEIGHT / 8;
+        net_ptr = std::make_shared<Interface>("SuperPoint", argv[2], true,
+                                              cv::Size(IMAGE_WIDTH,IMAGE_HEIGHT),
+                                              descriptor_width, descriptor_height, descriptor_dim);
     }
     else if (model_type == "disk")
     {
-        net_ptr = std::make_shared<Interface>("disk", argv[2], true, cv::Size(512,512));
         descriptor_dim = 128;
         descriptor_width = IMAGE_WIDTH;
         descriptor_height = IMAGE_HEIGHT;
+        net_ptr = std::make_shared<Interface>("disk", argv[2], true,
+                                              cv::Size(IMAGE_WIDTH,IMAGE_HEIGHT),
+                                              descriptor_width, descriptor_height, descriptor_dim);
     }
     else if (model_type == "xfeat")
     {
-        net_ptr = std::make_shared<Interface>("xfeat", argv[2], true, cv::Size(512,512));
         descriptor_dim = 64;
         descriptor_width = IMAGE_WIDTH / 8;
         descriptor_height = IMAGE_HEIGHT / 8;
+        net_ptr = std::make_shared<Interface>("xfeat", argv[2], true,
+                                              cv::Size(IMAGE_WIDTH,IMAGE_HEIGHT),
+                                              descriptor_width, descriptor_height, descriptor_dim);
     }
     else
     {
@@ -69,20 +85,24 @@ int main(int argc, char const *argv[])
 
     // 3. run the model && extract the key points
     std::vector<cv::KeyPoint> key_points;
-    cv::Mat score_map = cv::Mat(IMAGE_WIDTH, IMAGE_HEIGHT, CV_32FC1), \
-            desc_map = cv::Mat(descriptor_width, descriptor_height, CV_32FC(descriptor_dim));
+    cv::Mat score_map = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_32FC1), \
+            desc_map = cv::Mat(descriptor_height, descriptor_width, CV_32FC(descriptor_dim));
     cv::Mat desc;
 
     std::vector<cv::KeyPoint> key_points2;
-    cv::Mat score_map2 = cv::Mat(512, 512, CV_32FC1), \
-            desc_map2 = cv::Mat(descriptor_width, descriptor_height, CV_32FC(descriptor_dim));
+    cv::Mat score_map2 = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_32FC1), \
+            desc_map2 = cv::Mat(descriptor_height, descriptor_width, CV_32FC(descriptor_dim));
     cv::Mat desc2;
 
     auto start = std::chrono::system_clock::now();
-    for (int i = 0;i < 500; i ++) {
+//    for (int i = 0;i < 500; i ++)
+    {
         net_ptr->run(image, score_map, desc_map);
     }
     auto end = std::chrono::system_clock::now();
+
+    // print the mean cost in ms
+    std::cout<<"mean cost: "<<std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.f / 500.f <<" ms"<<std::endl;
 
     net_ptr->run(image, score_map, desc_map);
     key_points = nms(score_map, 500, 0.01, 16, cv::Mat());

@@ -3,32 +3,45 @@
 #include <string>
 #include <opencv2/opencv.hpp>
 #include <vector>
-#include "openvino/openvino.hpp"
+
+#include "NvInfer.h"
+#include "NvInferRuntime.h"
+#include "NvInferRuntimeCommon.h"
+#include <memory>
 #include "utils.h"
+
 
 class Interface
 {
 public:
-    Interface(std::string type, const std::string& modelPath, bool isGPU, cv::Size inputSize, bool gray=false);
+    Interface(std::string type, const std::string& modelPath, bool isGPU, cv::Size inputSize,
+              int descriptor_width, int descriptor_height, int descriptor_dim, bool gray=false);
+    ~Interface();
     void run(cv::Mat& image, cv::Mat& score_map_mat, cv::Mat& descriptor_map_mat);
 private:
-    void printInputAndOutputsInfoShort(const ov::Model& network);
-    void preprocessing(cv::Mat& image, float*& blob, std::vector<int64_t>& inputTensorShape);
-    void postprocessing(ov::InferRequest &score_map,
-                        cv::Mat& score_map_mat,
+
+    void preprocessing(cv::Mat& image, float* &input);
+    void postprocessing(float* buffer,
                         cv::Mat& descriptor_map_mat);
-    void d2net_postprocessing(ov::InferRequest &infer_request,
-                              cv::Mat& score_map_mat,
-                              cv::Mat& descriptor_map_mat);
-    void alike_postprocessing(ov::InferRequest &infer_request,
-                              cv::Mat& score_map_mat,
-                              cv::Mat& descriptor_map_mat);
-    ov::Core ie;
-    std::shared_ptr<ov::Model> network;
-    ov::CompiledModel executable_network;
+
+
+    nvinfer1::ICudaEngine* engine;
+    nvinfer1::IRuntime* runtime;
+    nvinfer1::IExecutionContext* context;
+    std::unique_ptr<nvinfer1::IHostMemory> trtModelStream;
+    cudaStream_t stream;
+
     cv::Size2f inputImageShape;
     bool grayscale = false;
     std::string model_type;
+
+    void *buffers[3];
+    float *tmp_buffer;
+
+    int descriptor_width;
+    int descriptor_height;
+    int descriptor_dim;
+    float *desc_tmp_buffer;
 };
 
 #endif //OPENVINO_DEMO_INTERFACE_H

@@ -35,4 +35,4 @@ Implementing c++ inference for various learning point features
 ## Supported Libraries:
 - [OpenVINO](https://docs.openvino.ai/2022.3/home.html) in openvino branch
 - [NCNN](https://github.com/Tencent/ncnn) (TODO)
-- [TensorRT](https://developer.nvidia.com/tensorrt) (TODO)
+- [TensorRT](https://developer.nvidia.com/tensorrt) in TensorRT branch
